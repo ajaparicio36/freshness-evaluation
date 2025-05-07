@@ -1,6 +1,6 @@
 "use client";
 import { useState, useEffect, useRef } from "react";
-import Image from "next/image";
+import { motion } from "framer-motion"; // Import motion
 
 // Define a type for the section names
 type SectionName = "instructions" | "evaluation" | "reference";
@@ -9,6 +9,7 @@ export default function Home() {
   const [activeStep, setActiveStep] = useState(0);
   const [activeSection, setActiveSection] =
     useState<SectionName>("instructions");
+  const [isMenuOpen, setIsMenuOpen] = useState(false); // State for mobile menu
 
   // Fix: Properly type the ref objects with HTMLElement
   const sectionRefs = {
@@ -108,10 +109,13 @@ export default function Home() {
 
   // Handle PDF export
   const handleExportPDF = () => {
-    alert("Exporting instructions as PDF...");
-    // In a real implementation, we would use a library like jsPDF to generate the PDF
-    // and then provide a download link
-    window.open("/FreshnessEvaluationIns.pdf", "_blank");
+    // Create a temporary anchor element
+    const link = document.createElement("a");
+    link.href = "/FreshnessEvaluationIns.pdf";
+    link.download = "FreshnessEvaluationInstructions.pdf"; // Suggested filename for the download
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
   };
 
   // Navigation visibility control
@@ -134,22 +138,126 @@ export default function Home() {
     };
   }, [lastScrollY]);
 
+  // Close menu when clicking outside
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      const target = event.target as HTMLElement;
+      if (isMenuOpen && !target.closest(".mobile-menu-container")) {
+        setIsMenuOpen(false);
+      }
+    };
+
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+    };
+  }, [isMenuOpen]);
+
   return (
-    <div className="min-h-screen pb-16">
-      {/* Navigation */}
+    <div className="min-h-screen pb-16 relative">
+      {/* Enhanced Animated Background with Fixed Positioning */}
+      <motion.div
+        className="fixed inset-0 -z-10 pointer-events-none overflow-hidden"
+        animate={{
+          background: [
+            "linear-gradient(120deg, rgba(144,224,239,0.4) 0%, rgba(202,240,248,0.3) 50%, rgba(72,202,228,0.35) 100%)",
+            "linear-gradient(120deg, rgba(72,202,228,0.4) 0%, rgba(144,224,239,0.3) 50%, rgba(202,240,248,0.35) 100%)",
+            "linear-gradient(120deg, rgba(0,180,216,0.35) 0%, rgba(72,202,228,0.3) 50%, rgba(144,224,239,0.4) 100%)",
+          ],
+        }}
+        transition={{
+          duration: 5, // Faster animation
+          repeat: Infinity,
+          repeatType: "reverse",
+          ease: "easeInOut",
+        }}
+      />
+
+      {/* Animated Floating Elements - Fixed Positions with Absolute Coordinates */}
+      <div className="fixed inset-0 -z-10 pointer-events-none overflow-hidden">
+        {[...Array(6)].map((_, i) => {
+          // Pre-calculate random values to ensure they don't change on re-render
+          const width = 5 + i * 2 + 4;
+          const height = width;
+          const leftPos = (i * 15 + 5) % 90;
+          const topPos = (i * 18 + 10) % 80;
+          const xMove = 15 + i * 3;
+          const yMove = 10 + i * 2;
+          const duration = 8 + i * 1.5;
+
+          return (
+            <motion.div
+              key={i}
+              className="absolute rounded-full bg-primary/15 backdrop-blur-sm"
+              style={{
+                width: `${width}rem`,
+                height: `${height}rem`,
+                left: `${leftPos}%`,
+                top: `${topPos}%`,
+                willChange: "transform, opacity", // Optimization for animation
+              }}
+              initial={{
+                x: 0,
+                y: 0,
+                opacity: 0.5,
+              }}
+              animate={{
+                x: [0, xMove, 0, -xMove, 0],
+                y: [0, yMove, 0, -yMove, 0],
+                opacity: [0.4, 0.7, 0.5, 0.7, 0.4],
+              }}
+              transition={{
+                duration: duration,
+                repeat: Infinity,
+                repeatType: "loop",
+                ease: "easeInOut",
+                delay: i * 0.8,
+              }}
+            />
+          );
+        })}
+      </div>
+
+      {/* Water ripple effect - adds subtle movement */}
+      <motion.div
+        className="fixed inset-0 -z-10 pointer-events-none"
+        style={{
+          backgroundSize: "400px 400px",
+          willChange: "backgroundPosition",
+        }}
+        animate={{
+          backgroundPositionX: ["0px", "400px"],
+          backgroundPositionY: ["0px", "400px"],
+        }}
+        transition={{
+          duration: 20,
+          repeat: Infinity,
+          ease: "linear",
+        }}
+      />
+
+      {/* Navigation with higher z-index */}
       <nav
         className={`nav-sticky transition-transform duration-300 ${
           isNavVisible ? "translate-y-0" : "-translate-y-full"
-        }`}
+        } backdrop-blur-md bg-white/80 z-30 shadow-sm`}
       >
         <div className="container mx-auto px-4 py-4 flex justify-between items-center">
           <div className="flex items-center gap-3">
-            <span className="text-primary font-semibold text-2xl">🐟</span>
+            <motion.span
+              className="text-primary font-semibold text-2xl"
+              animate={{ rotate: [0, 10, -10, 0] }}
+              transition={{ duration: 2, repeat: Infinity, repeatDelay: 5 }}
+            >
+              🐟
+            </motion.span>
             <h1 className="text-xl font-bold text-foreground">
               Fish Freshness Evaluation
             </h1>
           </div>
-          <div className="flex gap-6">
+
+          {/* Desktop Navigation */}
+          <div className="hidden md:flex gap-6">
             <button
               onClick={() => scrollToSection("instructions")}
               className={`${
@@ -181,11 +289,87 @@ export default function Home() {
               Reference
             </button>
           </div>
+
+          {/* Mobile Menu Button */}
+          <div className="md:hidden mobile-menu-container relative">
+            <button
+              onClick={() => setIsMenuOpen(!isMenuOpen)}
+              className="flex items-center gap-1 px-3 py-1 rounded-md bg-primary/10 text-primary"
+            >
+              Sections
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                width="16"
+                height="16"
+                viewBox="0 0 16 16"
+                fill="currentColor"
+                className={`transition-transform duration-300 ${
+                  isMenuOpen ? "rotate-180" : ""
+                }`}
+              >
+                <path d="M7.247 11.14 2.451 5.658C1.885 5.013 2.345 4 3.204 4h9.592a1 1 0 0 1 .753 1.659l-4.796 5.48a1 1 0 0 1-1.506 0z" />
+              </svg>
+            </button>
+
+            {/* Mobile Dropdown Menu */}
+            {isMenuOpen && (
+              <motion.div
+                initial={{ opacity: 0, y: -10 }}
+                animate={{ opacity: 1, y: 0 }}
+                className="absolute top-full right-0 mt-1 w-48 bg-white shadow-lg rounded-md overflow-hidden z-50"
+              >
+                <button
+                  onClick={() => {
+                    scrollToSection("instructions");
+                    setIsMenuOpen(false);
+                  }}
+                  className={`block w-full text-left px-4 py-2 ${
+                    activeSection === "instructions"
+                      ? "bg-primary/10 text-primary"
+                      : "hover:bg-gray-100"
+                  }`}
+                >
+                  Instructions
+                </button>
+                <button
+                  onClick={() => {
+                    scrollToSection("evaluation");
+                    setIsMenuOpen(false);
+                  }}
+                  className={`block w-full text-left px-4 py-2 ${
+                    activeSection === "evaluation"
+                      ? "bg-primary/10 text-primary"
+                      : "hover:bg-gray-100"
+                  }`}
+                >
+                  Evaluation Criteria
+                </button>
+                <button
+                  onClick={() => {
+                    scrollToSection("reference");
+                    setIsMenuOpen(false);
+                  }}
+                  className={`block w-full text-left px-4 py-2 ${
+                    activeSection === "reference"
+                      ? "bg-primary/10 text-primary"
+                      : "hover:bg-gray-100"
+                  }`}
+                >
+                  Reference
+                </button>
+              </motion.div>
+            )}
+          </div>
         </div>
       </nav>
 
       {/* Hero Section */}
-      <section className="bg-gradient-to-b from-primary/10 to-transparent py-20 mb-10">
+      <motion.section
+        className="relative bg-gradient-to-b from-primary/20 to-transparent py-20 mb-10 backdrop-blur-sm"
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        transition={{ duration: 1 }}
+      >
         <div className="container mx-auto px-4 text-center">
           <h1 className="text-4xl md:text-5xl font-bold text-foreground mb-4">
             Fish Freshness Evaluation Guide
@@ -195,14 +379,14 @@ export default function Home() {
             visual examination, odor assessment, and texture evaluation.
           </p>
         </div>
-      </section>
+      </motion.section>
 
       {/* Instructions Section */}
       <section
         ref={sectionRefs.instructions}
         className="container mx-auto px-4 py-10"
       >
-        <div className="max-w-3xl mx-auto">
+        <div className="max-w-3xl mx-auto backdrop-blur-sm bg-white/70 rounded-xl p-4">
           <h2 className="text-3xl font-bold mb-8 text-center">Instructions</h2>
 
           <div className="bg-white p-6 rounded-xl shadow-sm border border-border mb-6">
@@ -266,7 +450,7 @@ export default function Home() {
       {/* Evaluation Criteria Table */}
       <section
         ref={sectionRefs.evaluation}
-        className="container mx-auto px-4 py-10 bg-white/50 rounded-xl"
+        className="container mx-auto px-4 py-10 backdrop-blur-sm bg-white/60 rounded-xl"
       >
         <div className="max-w-4xl mx-auto">
           <h2 className="text-3xl font-bold mb-8 text-center">
@@ -298,12 +482,32 @@ export default function Home() {
         </div>
       </section>
 
+      {/* Export Button */}
+      <div className="container mx-auto px-4 mt-8 mb-16 text-center">
+        <button
+          onClick={handleExportPDF}
+          className="inline-flex items-center gap-2 px-4 py-2 bg-primary text-white rounded-md hover:bg-primary/90 transition-colors shadow-lg"
+        >
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            width="16"
+            height="16"
+            fill="currentColor"
+            viewBox="0 0 16 16"
+          >
+            <path d="M8 0a1 1 0 0 1 1 1v6h1.5a.5.5 0 0 1 .354.854l-2.5 2.5a.5.5 0 0 1-.708 0l-2.5-2.5A.5.5 0 0 1 5.5 7H7V1a1 1 0 0 1 1-1z" />
+            <path d="M4.5 11.5a.5.5 0 0 1 .5-.5h6a.5.5 0 0 1 0 1H5a.5.5 0 0 1-.5-.5z" />
+          </svg>
+          Export PDF
+        </button>
+      </div>
+
       {/* Reference Section */}
       <section
         ref={sectionRefs.reference}
         className="container mx-auto px-4 py-10"
       >
-        <div className="max-w-3xl mx-auto">
+        <div className="max-w-3xl mx-auto backdrop-blur-sm bg-white/70 rounded-xl p-4">
           <h2 className="text-3xl font-bold mb-8 text-center">Reference</h2>
 
           <div className="bg-white p-6 rounded-xl shadow-sm border border-border text-center">
@@ -323,21 +527,6 @@ export default function Home() {
           </div>
         </div>
       </section>
-
-      {/* Export Button */}
-      <button onClick={handleExportPDF} className="export-btn">
-        <svg
-          xmlns="http://www.w3.org/2000/svg"
-          width="16"
-          height="16"
-          fill="currentColor"
-          viewBox="0 0 16 16"
-        >
-          <path d="M8 0a1 1 0 0 1 1 1v6h1.5a.5.5 0 0 1 .354.854l-2.5 2.5a.5.5 0 0 1-.708 0l-2.5-2.5A.5.5 0 0 1 5.5 7H7V1a1 1 0 0 1 1-1z" />
-          <path d="M4.5 11.5a.5.5 0 0 1 .5-.5h6a.5.5 0 0 1 0 1H5a.5.5 0 0 1-.5-.5z" />
-        </svg>
-        Export PDF
-      </button>
     </div>
   );
 }
