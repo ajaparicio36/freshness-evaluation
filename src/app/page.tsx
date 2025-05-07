@@ -1,103 +1,343 @@
+"use client";
+import { useState, useEffect, useRef } from "react";
 import Image from "next/image";
 
-export default function Home() {
-  return (
-    <div className="grid grid-rows-[20px_1fr_20px] items-center justify-items-center min-h-screen p-8 pb-20 gap-16 sm:p-20 font-[family-name:var(--font-geist-sans)]">
-      <main className="flex flex-col gap-[32px] row-start-2 items-center sm:items-start">
-        <Image
-          className="dark:invert"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={180}
-          height={38}
-          priority
-        />
-        <ol className="list-inside list-decimal text-sm/6 text-center sm:text-left font-[family-name:var(--font-geist-mono)]">
-          <li className="mb-2 tracking-[-.01em]">
-            Get started by editing{" "}
-            <code className="bg-black/[.05] dark:bg-white/[.06] px-1 py-0.5 rounded font-[family-name:var(--font-geist-mono)] font-semibold">
-              src/app/page.tsx
-            </code>
-            .
-          </li>
-          <li className="tracking-[-.01em]">
-            Save and see your changes instantly.
-          </li>
-        </ol>
+// Define a type for the section names
+type SectionName = "instructions" | "evaluation" | "reference";
 
-        <div className="flex gap-4 items-center flex-col sm:flex-row">
-          <a
-            className="rounded-full border border-solid border-transparent transition-colors flex items-center justify-center bg-foreground text-background gap-2 hover:bg-[#383838] dark:hover:bg-[#ccc] font-medium text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5 sm:w-auto"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className="dark:invert"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={20}
-              height={20}
-            />
-            Deploy now
-          </a>
-          <a
-            className="rounded-full border border-solid border-black/[.08] dark:border-white/[.145] transition-colors flex items-center justify-center hover:bg-[#f2f2f2] dark:hover:bg-[#1a1a1a] hover:border-transparent font-medium text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5 w-full sm:w-auto md:w-[158px]"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Read our docs
-          </a>
+export default function Home() {
+  const [activeStep, setActiveStep] = useState(0);
+  const [activeSection, setActiveSection] =
+    useState<SectionName>("instructions");
+
+  // Fix: Properly type the ref objects with HTMLElement
+  const sectionRefs = {
+    instructions: useRef<HTMLDivElement>(null),
+    evaluation: useRef<HTMLDivElement>(null),
+    reference: useRef<HTMLDivElement>(null),
+  };
+
+  // Add type to the section parameter
+  const scrollToSection = (section: SectionName) => {
+    sectionRefs[section].current?.scrollIntoView({ behavior: "smooth" });
+    setActiveSection(section);
+  };
+
+  // Instructions steps
+  const instructionSteps = [
+    {
+      title: "General Instructions",
+      items: [
+        "Touch the fish only as needed, body temperature may contribute to the spoiling of the fish",
+        "Assess from Head to Tail",
+        "If possible, use multiple fish samples for comparison",
+        "Document any unusual conditions",
+      ],
+    },
+    {
+      title: "External Visual Examination",
+      description:
+        "Examine visually the physical condition of the fish, eye and gill color, any belly bursting, damages in the skin and scales",
+    },
+    {
+      title: "Assess the Odor",
+      description:
+        "Assess the odor of the fish, fresh fish usually have a seaweedy, or sea-like smell, while spoiled fish have a strong sour odor.",
+    },
+    {
+      title: "Evaluate the Texture",
+      description:
+        "Touch the skin, scales and body. Asses whether the skin and scales are loose and whether the muscles of the fish are sill elastic",
+    },
+  ];
+
+  // Table data
+  const tableData = [
+    {
+      characteristic: "Skin",
+      fresh: "Bright, shiny, and firm",
+      stale: "Dull, slight bleaching",
+      spoiled: "Dull, marked bleaching",
+    },
+    {
+      characteristic: "Eyes",
+      fresh: "Clear, convex, and black pupil",
+      stale: "Slightly sunken, cloudy",
+      spoiled: "Sunken, cloudy, discolored",
+    },
+    {
+      characteristic: "Gills",
+      fresh: "Red, clean, and moist",
+      stale: "Pinkish, slightly sticky",
+      spoiled: "Brown, thick mucus",
+    },
+    {
+      characteristic: "Odor",
+      fresh: "Fresh, seaweedy smell",
+      stale: "Neutral or slightly sour",
+      spoiled: "Strongly sour or ammonia-like",
+    },
+    {
+      characteristic: "Texture",
+      fresh: "Firm, springs back when pressed",
+      stale: "Soft but still springs back slowly",
+      spoiled: "Very soft, does not springback",
+    },
+    {
+      characteristic: "Scales",
+      fresh: "Bright, shiny, firmly attached",
+      stale: "Dull, slightly loose",
+      spoiled: "Dull, flaking, easily removable",
+    },
+    {
+      characteristic: "Belly",
+      fresh: "Firm, no soft spots, no bursting",
+      stale: "Soft but still springs back",
+      spoiled: "Soft, fluid leakage and burst belly",
+    },
+  ];
+
+  // Handle next step in instructions
+  const handleNextStep = () => {
+    if (activeStep < instructionSteps.length - 1) {
+      setActiveStep(activeStep + 1);
+    } else {
+      setActiveStep(0); // Loop back to start
+    }
+  };
+
+  // Handle PDF export
+  const handleExportPDF = () => {
+    alert("Exporting instructions as PDF...");
+    // In a real implementation, we would use a library like jsPDF to generate the PDF
+    // and then provide a download link
+    window.open("/FreshnessEvaluationIns.pdf", "_blank");
+  };
+
+  // Navigation visibility control
+  const [isNavVisible, setIsNavVisible] = useState(true);
+  const [lastScrollY, setLastScrollY] = useState(0);
+
+  useEffect(() => {
+    const handleScroll = () => {
+      if (window.scrollY > lastScrollY) {
+        setIsNavVisible(false);
+      } else {
+        setIsNavVisible(true);
+      }
+      setLastScrollY(window.scrollY);
+    };
+
+    window.addEventListener("scroll", handleScroll);
+    return () => {
+      window.removeEventListener("scroll", handleScroll);
+    };
+  }, [lastScrollY]);
+
+  return (
+    <div className="min-h-screen pb-16">
+      {/* Navigation */}
+      <nav
+        className={`nav-sticky transition-transform duration-300 ${
+          isNavVisible ? "translate-y-0" : "-translate-y-full"
+        }`}
+      >
+        <div className="container mx-auto px-4 py-4 flex justify-between items-center">
+          <div className="flex items-center gap-3">
+            <span className="text-primary font-semibold text-2xl">🐟</span>
+            <h1 className="text-xl font-bold text-foreground">
+              Fish Freshness Evaluation
+            </h1>
+          </div>
+          <div className="flex gap-6">
+            <button
+              onClick={() => scrollToSection("instructions")}
+              className={`${
+                activeSection === "instructions"
+                  ? "text-primary font-medium"
+                  : "text-foreground/70"
+              }`}
+            >
+              Instructions
+            </button>
+            <button
+              onClick={() => scrollToSection("evaluation")}
+              className={`${
+                activeSection === "evaluation"
+                  ? "text-primary font-medium"
+                  : "text-foreground/70"
+              }`}
+            >
+              Evaluation Criteria
+            </button>
+            <button
+              onClick={() => scrollToSection("reference")}
+              className={`${
+                activeSection === "reference"
+                  ? "text-primary font-medium"
+                  : "text-foreground/70"
+              }`}
+            >
+              Reference
+            </button>
+          </div>
         </div>
-      </main>
-      <footer className="row-start-3 flex gap-[24px] flex-wrap items-center justify-center">
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
+      </nav>
+
+      {/* Hero Section */}
+      <section className="bg-gradient-to-b from-primary/10 to-transparent py-20 mb-10">
+        <div className="container mx-auto px-4 text-center">
+          <h1 className="text-4xl md:text-5xl font-bold text-foreground mb-4">
+            Fish Freshness Evaluation Guide
+          </h1>
+          <p className="text-lg text-foreground/80 max-w-2xl mx-auto">
+            A comprehensive guide to evaluate the freshness of fish through
+            visual examination, odor assessment, and texture evaluation.
+          </p>
+        </div>
+      </section>
+
+      {/* Instructions Section */}
+      <section
+        ref={sectionRefs.instructions}
+        className="container mx-auto px-4 py-10"
+      >
+        <div className="max-w-3xl mx-auto">
+          <h2 className="text-3xl font-bold mb-8 text-center">Instructions</h2>
+
+          <div className="bg-white p-6 rounded-xl shadow-sm border border-border mb-6">
+            <div className="flex justify-between mb-4">
+              <h3 className="text-xl font-semibold">Step-by-Step Guide</h3>
+              <div className="flex gap-2">
+                <button
+                  onClick={handleNextStep}
+                  className="btn-primary flex items-center gap-2"
+                >
+                  <span>Next Step</span>
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    width="16"
+                    height="16"
+                    fill="currentColor"
+                    viewBox="0 0 16 16"
+                  >
+                    <path
+                      fillRule="evenodd"
+                      d="M8 3.5a.5.5 0 0 1 .5.5v4.8l2.15-2.15a.5.5 0 1 1 .7.7l-3 3a.5.5 0 0 1-.7 0l-3-3a.5.5 0 1 1 .7-.7L7.5 8.8V4a.5.5 0 0 1 .5-.5z"
+                    />
+                  </svg>
+                </button>
+              </div>
+            </div>
+
+            <div className="space-y-4">
+              {instructionSteps.map((step, index) => (
+                <div
+                  key={index}
+                  className={`instruction-step ${
+                    index === activeStep ? "active" : ""
+                  }`}
+                >
+                  <h4 className="text-lg font-medium mb-2 flex items-center">
+                    <span className="flex items-center justify-center w-6 h-6 rounded-full bg-primary/10 text-primary text-sm font-semibold mr-2">
+                      {index + 1}
+                    </span>
+                    {step.title}
+                  </h4>
+
+                  {step.items ? (
+                    <ul className="list-disc pl-8 space-y-1">
+                      {step.items.map((item, itemIndex) => (
+                        <li key={itemIndex} className="text-foreground/80">
+                          {item}
+                        </li>
+                      ))}
+                    </ul>
+                  ) : (
+                    <p className="text-foreground/80">{step.description}</p>
+                  )}
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* Evaluation Criteria Table */}
+      <section
+        ref={sectionRefs.evaluation}
+        className="container mx-auto px-4 py-10 bg-white/50 rounded-xl"
+      >
+        <div className="max-w-4xl mx-auto">
+          <h2 className="text-3xl font-bold mb-8 text-center">
+            Freshness Evaluation Criteria
+          </h2>
+
+          <div className="overflow-x-auto">
+            <table className="freshness-table">
+              <thead>
+                <tr>
+                  <th>Characteristic</th>
+                  <th>Fresh</th>
+                  <th>Stale</th>
+                  <th>Spoiled</th>
+                </tr>
+              </thead>
+              <tbody>
+                {tableData.map((row, index) => (
+                  <tr key={index}>
+                    <td className="font-medium">{row.characteristic}</td>
+                    <td>{row.fresh}</td>
+                    <td>{row.stale}</td>
+                    <td>{row.spoiled}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+
+      {/* Reference Section */}
+      <section
+        ref={sectionRefs.reference}
+        className="container mx-auto px-4 py-10"
+      >
+        <div className="max-w-3xl mx-auto">
+          <h2 className="text-3xl font-bold mb-8 text-center">Reference</h2>
+
+          <div className="bg-white p-6 rounded-xl shadow-sm border border-border text-center">
+            <p className="text-foreground/80">
+              FAO. (n.d.). Quality and quality changes in fresh fish - 8.
+              Assessment of fish quality.
+              <br />
+              <a
+                href="https://www.fao.org/4/v7180e/v7180e09.htm"
+                className="text-primary hover:underline"
+                target="_blank"
+                rel="noreferrer"
+              >
+                https://www.fao.org/4/v7180e/v7180e09.htm
+              </a>
+            </p>
+          </div>
+        </div>
+      </section>
+
+      {/* Export Button */}
+      <button onClick={handleExportPDF} className="export-btn">
+        <svg
+          xmlns="http://www.w3.org/2000/svg"
+          width="16"
+          height="16"
+          fill="currentColor"
+          viewBox="0 0 16 16"
         >
-          <Image
-            aria-hidden
-            src="/file.svg"
-            alt="File icon"
-            width={16}
-            height={16}
-          />
-          Learn
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/window.svg"
-            alt="Window icon"
-            width={16}
-            height={16}
-          />
-          Examples
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/globe.svg"
-            alt="Globe icon"
-            width={16}
-            height={16}
-          />
-          Go to nextjs.org →
-        </a>
-      </footer>
+          <path d="M8 0a1 1 0 0 1 1 1v6h1.5a.5.5 0 0 1 .354.854l-2.5 2.5a.5.5 0 0 1-.708 0l-2.5-2.5A.5.5 0 0 1 5.5 7H7V1a1 1 0 0 1 1-1z" />
+          <path d="M4.5 11.5a.5.5 0 0 1 .5-.5h6a.5.5 0 0 1 0 1H5a.5.5 0 0 1-.5-.5z" />
+        </svg>
+        Export PDF
+      </button>
     </div>
   );
 }
