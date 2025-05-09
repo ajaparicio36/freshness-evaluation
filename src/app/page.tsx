@@ -48,7 +48,7 @@ export default function Home() {
     {
       title: "Evaluate the Texture",
       description:
-        "Touch the skin, scales and body. Asses whether the skin and scales are loose and whether the muscles of the fish are sill elastic",
+        "Touch the skin, scales and body. Assess whether the skin and scales are loose and whether the muscles of the fish are still elastic",
     },
   ];
 
@@ -95,6 +95,30 @@ export default function Home() {
       fresh: "Firm, no soft spots, no bursting",
       stale: "Soft but still springs back",
       spoiled: "Soft, fluid leakage and burst belly",
+    },
+  ];
+
+  // Temperature sensor data
+  const temperatureSensorData = [
+    {
+      label: "Outside Freezer",
+      color: "#d9d7cd",
+      status: "Not optimal",
+    },
+    {
+      label: "Room",
+      color: "#f5b1b6",
+      status: "Not optimal",
+    },
+    {
+      label: "Refrigerator",
+      color: "#e4a29b",
+      status: "Slightly optimal",
+    },
+    {
+      label: "Refrigerator",
+      color: "#de9790",
+      status: "Optimal",
     },
   ];
 
@@ -388,6 +412,37 @@ export default function Home() {
       >
         <div className="max-w-3xl mx-auto backdrop-blur-sm bg-white/70 rounded-xl p-4">
           <h2 className="text-3xl font-bold mb-8 text-center">Instructions</h2>
+
+          {/* Temperature Sensor Color Chart */}
+          <div className="bg-white p-6 rounded-xl shadow-sm border border-border mb-6">
+            <h3 className="text-xl font-semibold mb-3">
+              Temperature Sensor Guide
+            </h3>
+            <p className="text-sm text-foreground/70 italic mb-4">
+              *Disclaimer: colors may appear different on the product itself,
+              the darker the color the better the temperature.
+            </p>
+
+            <div className="grid grid-cols-4 gap-2 mb-4">
+              {temperatureSensorData.map((item, index) => (
+                <div key={index} className="text-center">
+                  <p className="text-sm mb-1">{item.label}</p>
+                  <div
+                    className="h-24 rounded-md shadow-sm mx-auto transition-transform hover:scale-105"
+                    style={{ backgroundColor: item.color }}
+                  ></div>
+                </div>
+              ))}
+            </div>
+
+            <div className="grid grid-cols-4 gap-2 mt-2">
+              {temperatureSensorData.map((item, index) => (
+                <div key={`status-${index}`} className="text-center">
+                  <p className="text-sm font-medium">{item.status}</p>
+                </div>
+              ))}
+            </div>
+          </div>
 
           <div className="bg-white p-6 rounded-xl shadow-sm border border-border mb-6">
             <div className="flex justify-between mb-4">
