@@ -8,8 +8,8 @@ const inter = Inter({
 });
 
 export const metadata: Metadata = {
-  title: "Fish Freshness Evaluation Guide",
-  description: "A comprehensive guide for evaluating fish freshness",
+  title: "ThermoPack",
+  description: "A Temperature-Sensitive Packaging for Frozen Fishery Products",
 };
 
 export default function RootLayout({
