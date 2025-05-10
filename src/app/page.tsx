@@ -275,9 +275,7 @@ export default function Home() {
             >
               🐟
             </motion.span>
-            <h1 className="text-xl font-bold text-foreground">
-              Fish Freshness Evaluation
-            </h1>
+            <h1 className="text-xl font-bold text-foreground">ThermoPack</h1>
           </div>
 
           {/* Desktop Navigation */}
@@ -396,11 +394,10 @@ export default function Home() {
       >
         <div className="container mx-auto px-4 text-center">
           <h1 className="text-4xl md:text-5xl font-bold text-foreground mb-4">
-            Fish Freshness Evaluation Guide
+            ThermoPack
           </h1>
           <p className="text-lg text-foreground/80 max-w-2xl mx-auto">
-            A comprehensive guide to evaluate the freshness of fish through
-            visual examination, odor assessment, and texture evaluation.
+            A Temperature-Sensitive Packaging for Frozen Fishery Products
           </p>
         </div>
       </motion.section>
@@ -435,18 +432,23 @@ export default function Home() {
               ))}
             </div>
 
-            <div className="grid grid-cols-4 gap-2 mt-2">
+            <div className="grid grid-cols-4 gap-2 mt-2 mb-3">
               {temperatureSensorData.map((item, index) => (
                 <div key={`status-${index}`} className="text-center">
                   <p className="text-sm font-medium">{item.status}</p>
                 </div>
               ))}
             </div>
+
+            <p className="text-sm text-foreground/70 italic mb-4">
+              *If sensor is left at a non-optimal temperature for a long time,
+              conduct sensory evaluation.
+            </p>
           </div>
 
           <div className="bg-white p-6 rounded-xl shadow-sm border border-border mb-6">
             <div className="flex justify-between mb-4">
-              <h3 className="text-xl font-semibold">Step-by-Step Guide</h3>
+              <h3 className="text-xl font-semibold">Sensory Evaluation</h3>
               <div className="flex gap-2">
                 <button
                   onClick={handleNextStep}
@@ -509,7 +511,7 @@ export default function Home() {
       >
         <div className="max-w-4xl mx-auto">
           <h2 className="text-3xl font-bold mb-8 text-center">
-            Freshness Evaluation Criteria
+            Sensory Evaluation Criteria
           </h2>
 
           <div className="overflow-x-auto">
