@@ -116,7 +116,7 @@ export default function Home() {
       status: "Slightly optimal",
     },
     {
-      label: "Refrigerator",
+      label: "Freezer",
       color: "#de9790",
       status: "Optimal",
     },
