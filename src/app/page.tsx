@@ -101,12 +101,12 @@ export default function Home() {
   // Temperature sensor data
   const temperatureSensorData = [
     {
-      label: "Outside Freezer",
+      label: "Outside",
       color: "#d9d7cd",
       status: "Not optimal",
     },
     {
-      label: "Room",
+      label: "Room Temp",
       color: "#f5b1b6",
       status: "Not optimal",
     },
